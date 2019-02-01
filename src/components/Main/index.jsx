@@ -5,10 +5,11 @@ import InputText from '../InputText'
 import ProfileBar from '../ProfileBar'
 
 class Main extends Component {
-  constructor (){
-    super()
+  constructor (props){
+    super(props)
 
     this.state = {
+      user: Object.assign({}, this.props.user, { retweets: [] }, { favorites: [] }),
       openText: false,
       messages: [
         {
@@ -37,6 +38,8 @@ class Main extends Component {
     this.handleSendText = this.handleSendText.bind(this)
     this.handleCloseText = this.handleCloseText.bind(this)
     this.handleOpenText = this.handleOpenText.bind(this)
+    this.handleRetweet = this.handleRetweet.bind(this)
+    this.handleFavorite = this.handleFavorite.bind(this)
   }
 
   handleSendText(event){
@@ -74,6 +77,12 @@ class Main extends Component {
           msg.retweets++
         }
         return msg
+      })
+      let user = Object.assign({}, this.state.user)
+      user.retweets.push(msgId)
+      this.setState({
+        messages,
+        user
       })
     }
   }

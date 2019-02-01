@@ -21448,7 +21448,7 @@
 	      user: {
 	        photoURL: 'https://pbs.twimg.com/profile_images/1014574035995381760/xxA7qmVp_bigger.jpg',
 	        email: 'samurc.net@gmail.com',
-	        onOpenText: false
+	        displayName: 'Samuel Cusi'
 	      }
 	    };
 	    return _this;
@@ -22015,31 +22015,103 @@
 	        picture: 'https://pbs.twimg.com/profile_images/1014574035995381760/xxA7qmVp_bigger.jpg',
 	        displayName: 'Samuel Cusi',
 	        username: 'samurRC',
-	        date: Date.now() - 180000
+	        date: Date.now() - 180000,
+	        retweets: 0,
+	        favorites: 0
 	      }, {
 	        id: _uuid2.default.v4(),
 	        text: 'Este es un nuevo mensaje',
 	        picture: 'https://pbs.twimg.com/profile_images/1014574035995381760/xxA7qmVp_bigger.jpg',
 	        displayName: 'Samuel Cusi',
 	        username: 'samurRC',
-	        date: Date.now() - 1800000
+	        date: Date.now() - 1800000,
+	        retweets: 0,
+	        favorites: 0
 	      }]
 	    };
+
+	    _this.handleSendText = _this.handleSendText.bind(_this);
+	    _this.handleCloseText = _this.handleCloseText.bind(_this);
+	    _this.handleOpenText = _this.handleOpenText.bind(_this);
 	    return _this;
 	  }
 
 	  _createClass(Main, [{
+	    key: 'handleSendText',
+	    value: function handleSendText(event) {
+	      event.preventDefault();
+	      var newMessage = {
+	        id: _uuid2.default.v4(),
+	        username: this.props.user.email.split('@')[0],
+	        displayName: this.props.user.displayName,
+	        picture: this.props.user.photoURL,
+	        date: Date.now(),
+	        text: event.target.text.value
+	      };
+	      this.setState({
+	        messages: this.state.messages.concat([newMessage]),
+	        openText: false
+	      });
+	      console.log(newMessage);
+	    }
+	  }, {
+	    key: 'handleCloseText',
+	    value: function handleCloseText(event) {
+	      event.preventDefault();
+	      this.setState({ openText: false });
+	    }
+	  }, {
 	    key: 'handleOpenText',
 	    value: function handleOpenText(event) {
 	      event.preventDefault();
-	      console.log('hizo click');
 	      this.setState({ openText: true });
+	    }
+	  }, {
+	    key: 'handleRetweet',
+	    value: function handleRetweet(msgId) {
+	      var alreadyRetweeted = this.state.user.retweets.filter(function (rt) {
+	        return rt === msgId;
+	      });
+	      if (alreadyRetweeted.length === 0) {
+	        var messages = this.state.messages.map(function (msg) {
+	          if (msg.id === msgId) {
+	            msg.retweets++;
+	          }
+	          return msg;
+	        });
+	      }
+	    }
+	  }, {
+	    key: 'handleFavorite',
+	    value: function handleFavorite(msgId) {
+	      var alreadyFavorited = this.stage.user.favorites.filter(function (fav) {
+	        return fav === msgId;
+	      });
+	      if (alreyFavorited.length === 0) {
+	        var messages = this.state.messages.map(function (msg) {
+	          if (msg.id === msgId) {
+	            msg.favorites++;
+	          }
+	          return msg;
+	        });
+
+	        var user = Object.assign({}, this.state.user);
+	        user.favorites.push(msgId);
+
+	        this.setState({
+	          messages: messages,
+	          user: user
+	        });
+	      }
 	    }
 	  }, {
 	    key: 'renderOpenText',
 	    value: function renderOpenText() {
 	      if (this.state.openText) {
-	        return _react2.default.createElement(_InputText2.default, null);
+	        return _react2.default.createElement(_InputText2.default, {
+	          onSendText: this.handleSendText,
+	          onCloseText: this.handleCloseText
+	        });
 	      }
 	    }
 	  }, {
@@ -22051,10 +22123,14 @@
 	        _react2.default.createElement(_ProfileBar2.default, {
 	          picture: this.props.user.photoURL,
 	          username: this.props.user.email.split('@')[0],
-	          onOpenText: this.handleOpenText.bind(this)
+	          onOpenText: this.handleOpenText
 	        }),
 	        this.renderOpenText(),
-	        _react2.default.createElement(_MessageList2.default, { messages: this.state.messages })
+	        _react2.default.createElement(_MessageList2.default, {
+	          messages: this.state.messages,
+	          onRetweet: this.handleRetweet,
+	          onFavorite: this.handleFavorite
+	        })
 	      );
 	    }
 	  }]);
@@ -22330,12 +22406,18 @@
 	  function MessageList(props) {
 	    _classCallCheck(this, MessageList);
 
-	    return _possibleConstructorReturn(this, (MessageList.__proto__ || Object.getPrototypeOf(MessageList)).call(this, props));
+	    var _this = _possibleConstructorReturn(this, (MessageList.__proto__ || Object.getPrototypeOf(MessageList)).call(this, props));
+
+	    _this.onRetweet = _this.onRetweet.bind(_this);
+	    _this.onFavorite = _this.onFavorite.bind(_this);
+	    return _this;
 	  }
 
 	  _createClass(MessageList, [{
 	    key: 'render',
 	    value: function render() {
+	      var _this2 = this;
+
 	      return _react2.default.createElement(
 	        'div',
 	        { className: _messageList2.default.root },
@@ -22346,9 +22428,17 @@
 	            picture: msg.picture,
 	            displayName: msg.displayName,
 	            username: msg.username,
-	            date: msg.date
+	            date: msg.date,
+	            numRetweets: msg.retweets,
+	            numFavorites: msg.favorites,
+	            onRetweet: function onRetweet() {
+	              return _this2.props.onRetweet(msg.id);
+	            },
+	            onFavorite: function onFavorite() {
+	              return _this2.props.onFavorite(msg.id);
+	            }
 	          });
-	        })
+	        }).reverse()
 	      );
 	    }
 	  }]);
@@ -22396,10 +22486,35 @@
 	  function Message(props) {
 	    _classCallCheck(this, Message);
 
-	    return _possibleConstructorReturn(this, (Message.__proto__ || Object.getPrototypeOf(Message)).call(this, props));
+	    var _this = _possibleConstructorReturn(this, (Message.__proto__ || Object.getPrototypeOf(Message)).call(this, props));
+
+	    _this.state = {
+	      pressFavorite: false,
+	      pressRetweet: false
+	    };
+
+	    _this.onPressRetweet = _this.onPressRetweet.bind(_this);
+	    _this.onPressFavorite = _this.onPressFavorite.bind(_this);
+	    return _this;
 	  }
 
 	  _createClass(Message, [{
+	    key: 'onPressFavorite',
+	    value: function onPressFavorite() {
+	      this.props.onFavorite();
+	      this.setState({
+	        pressFavorite: true
+	      });
+	    }
+	  }, {
+	    key: 'onPressRetweet',
+	    value: function onPressRetweet() {
+	      this.props.onRetweet();
+	      this.setState({
+	        onPressRetweet: true
+	      });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      var dateFormat = (0, _moment2.default)(this.props.date).fromNow();
@@ -22446,13 +22561,29 @@
 	          ),
 	          _react2.default.createElement(
 	            'div',
-	            { className: _message2.default.icon },
-	            _react2.default.createElement('span', { className: 'fa fa-star' })
+	            {
+	              className: this.state.pressRetweet ? _message2.default.rtGreen : '',
+	              onClick: this.onPressRetweet
+	            },
+	            _react2.default.createElement('span', { className: 'fa fa-retweet' }),
+	            _react2.default.createElement(
+	              'span',
+	              { className: _message2.default.num },
+	              this.props.numRetweets
+	            )
 	          ),
 	          _react2.default.createElement(
 	            'div',
-	            { className: _message2.default.icon },
-	            _react2.default.createElement('span', { className: 'fa fa-retweet' })
+	            {
+	              className: this.state.pressFavorite ? _message2.default.favYellow : '',
+	              onClick: this.onPressFavorite
+	            },
+	            _react2.default.createElement('span', { className: 'fa fa-star' }),
+	            _react2.default.createElement(
+	              'span',
+	              { className: _message2.default.num },
+	              this.props.numFavorites
+	            )
 	          )
 	        )
 	      );
@@ -39596,7 +39727,7 @@
 
 
 	// module
-	exports.push([module.id, ".message__root__3G3Wm{\r\n  background-color: #fff;\r\n  border: 1px solid #ccc;\r\n  border-radius: 5px;\r\n  padding: 1em;\r\n  margin: 0.5em;\r\n}\r\n\r\n.message__text__3o1wq{\r\n  font-size: 16pt;\r\n  font-weight: 200;\r\n}\r\n\r\n.message__user__358Wl{\r\n  display: flex;\r\n  align-items: center;\r\n}\r\n\r\n.message__avatar__302_d{\r\n  width: 34px;\r\n  height: 34px;\r\n  border-radius: 50%;\r\n}\r\n\r\n.message__displayName__3ZjN3{\r\n  font-weight: bold;\r\n  padding: 0.5em;\r\n}\r\n\r\n.message__username__xsE21{\r\n  color: #aa;\r\n}\r\n\r\n.message__date__3LmSH{\r\n  color: #aaa;\r\n  padding: 0.5em;\r\n  font-size: 8pt;\r\n}\r\n\r\n.message__buttons__11Rvi{\r\n  display: flex;\r\n  justify-content: flex-start;\r\n  color: #aaa;\r\n}\r\n\r\n.message__icon__1eqVT{\r\n  margin-right: 3em;\r\n}\r\n", ""]);
+	exports.push([module.id, ".message__root__3G3Wm{\r\n  background-color: #fff;\r\n  border: 1px solid #ccc;\r\n  border-radius: 5px;\r\n  padding: 1em;\r\n  margin: 0.5em;\r\n}\r\n\r\n.message__text__3o1wq{\r\n  font-size: 16pt;\r\n  font-weight: 200;\r\n}\r\n\r\n.message__user__358Wl{\r\n  display: flex;\r\n  align-items: center;\r\n}\r\n\r\n.message__avatar__302_d{\r\n  width: 34px;\r\n  height: 34px;\r\n  border-radius: 50%;\r\n}\r\n\r\n.message__displayName__3ZjN3{\r\n  font-weight: bold;\r\n  padding: 0.5em;\r\n}\r\n\r\n.message__username__xsE21{\r\n  color: #aa;\r\n}\r\n\r\n.message__date__3LmSH{\r\n  color: #aaa;\r\n  padding: 0.5em;\r\n  font-size: 8pt;\r\n}\r\n\r\n.message__buttons__11Rvi{\r\n  display: flex;\r\n  justify-content: flex-start;\r\n  color: #aaa;\r\n}\r\n\r\n.message__icon__1eqVT{\r\n  margin-right: 3em;\r\n}\r\n\r\n.message__num__18vPM{\r\n  font-size: 10pt;\r\n  margin-right: 3em;\r\n  margin-left: 0.25em;\r\n}\r\n\r\n.message__rtGreen__3_ki_{\r\n  color: #20883f;\r\n}\r\n\r\n.message__favYellow__2yD4J{\r\n  color: #e2c400;\r\n}\r\n", ""]);
 
 	// exports
 	exports.locals = {
@@ -39608,7 +39739,10 @@
 		"username": "message__username__xsE21",
 		"date": "message__date__3LmSH",
 		"buttons": "message__buttons__11Rvi",
-		"icon": "message__icon__1eqVT"
+		"icon": "message__icon__1eqVT",
+		"num": "message__num__18vPM",
+		"rtGreen": "message__rtGreen__3_ki_",
+		"favYellow": "message__favYellow__2yD4J"
 	};
 
 /***/ },
@@ -39696,7 +39830,7 @@
 	      return _react2.default.createElement(
 	        'form',
 	        { className: _inputText2.default.form, onSubmit: this.props.onSendText },
-	        _react2.default.createElement('textarea', { className: _inputText2.default.text, name: 'test' }),
+	        _react2.default.createElement('textarea', { className: _inputText2.default.text, name: 'text' }),
 	        _react2.default.createElement(
 	          'div',
 	          { className: _inputText2.default.buttons },
