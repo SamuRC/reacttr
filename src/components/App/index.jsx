@@ -13,37 +13,17 @@ class App extends Component {
       user: {
         photoURL: 'https://pbs.twimg.com/profile_images/1014574035995381760/xxA7qmVp_bigger.jpg',
         email: 'samurc.net@gmail.com',
-        displayName: 'Samuel Cusi'
+        displayName: 'Samuel Cusi',
       }
     }
   }
 
   render (){
     return (
-      <HashRouter>
         <div>
           <Header />
-
-          <Match exactly pattern='/' render={()=>{
-            if(this.state.user){
-              return (
-                <Main user={this.state.user} />
-              )
-            }else{
-              // Render <Login/>
-            }
-          }} />
-
-          <Match pattern='/profile' render={()=>{
-            // Render <Profile />>
-          }} />
-
-          <Match pattern='/user/:username' render={({ params })=>{
-            // Render <Profile /> pasando params.username
-          }} />
-
+          <Main user={this.state.user} />
         </div>
-      </HashRouter>
     )
   }
 }

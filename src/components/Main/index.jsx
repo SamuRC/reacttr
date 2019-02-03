@@ -11,6 +11,7 @@ class Main extends Component {
     this.state = {
       user: Object.assign({}, this.props.user, { retweets: [] }, { favorites: [] }),
       openText: false,
+      userNameToReply: '',
       messages: [
         {
           id: uuid.v4(),
@@ -40,6 +41,7 @@ class Main extends Component {
     this.handleOpenText = this.handleOpenText.bind(this)
     this.handleRetweet = this.handleRetweet.bind(this)
     this.handleFavorite = this.handleFavorite.bind(this)
+    this.handleReplyTweet = this.handleReplyTweet.bind(this)
   }
 
   handleSendText(event){
@@ -88,8 +90,8 @@ class Main extends Component {
   }
 
   handleFavorite(msgId){
-    let alreadyFavorited = this.stage.user.favorites.filter(fav => fav === msgId)
-    if(alreyFavorited.length===0){
+    let alreadyFavorited = this.state.user.favorites.filter(fav => fav === msgId)
+    if(alreadyFavorited.length===0){
       let messages = this.state.messages.map(msg=>{
         if(msg.id === msgId){
           msg.favorites++
@@ -99,12 +101,18 @@ class Main extends Component {
 
       let user = Object.assign({}, this.state.user)
       user.favorites.push(msgId)
-
       this.setState({
         messages,
         user
       })
     }
+  }
+
+  handleReplyTweet(msgId, userNameToReply){
+    this.setState({
+      openText: true,
+      userNameToReply
+    })
   }
 
   renderOpenText(){
@@ -113,6 +121,7 @@ class Main extends Component {
         <InputText
           onSendText={this.handleSendText}
           onCloseText={this.handleCloseText}
+          userNameToReply={this.state.userNameToReply}
         />
       )
     }
@@ -132,6 +141,7 @@ class Main extends Component {
           messages={this.state.messages}
           onRetweet={this.handleRetweet}
           onFavorite={this.handleFavorite}
+          onReplyTweet={this.handleReplyTweet}
         />
       </div>
     )
