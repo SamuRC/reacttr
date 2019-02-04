@@ -1,11 +1,15 @@
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 import uuid from 'uuid'
 import MessageList from '../MessageList'
 import InputText from '../InputText'
 import ProfileBar from '../ProfileBar'
 
+const propTypes = {
+  user: PropTypes.object.isRequired
+}
+
 class Main extends Component {
-  constructor (props){
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -19,7 +23,7 @@ class Main extends Component {
           picture: 'https://pbs.twimg.com/profile_images/1014574035995381760/xxA7qmVp_bigger.jpg',
           displayName: 'Samuel Cusi',
           username: 'samurRC',
-          date: Date.now()-180000,
+          date: Date.now() - 180000,
           retweets: 0,
           favorites: 0
         },
@@ -29,7 +33,7 @@ class Main extends Component {
           picture: 'https://pbs.twimg.com/profile_images/1014574035995381760/xxA7qmVp_bigger.jpg',
           displayName: 'Samuel Cusi',
           username: 'samurRC',
-          date: Date.now()-1800000,
+          date: Date.now() - 1800000,
           retweets: 0,
           favorites: 0
         }
@@ -44,7 +48,7 @@ class Main extends Component {
     this.handleReplyTweet = this.handleReplyTweet.bind(this)
   }
 
-  handleSendText(event){
+  handleSendText (event) {
     event.preventDefault()
     let newMessage = {
       id: uuid.v4(),
@@ -58,24 +62,24 @@ class Main extends Component {
       messages: this.state.messages.concat([newMessage]),
       openText: false
     })
-    console.log(newMessage);
+    console.log(newMessage)
   }
 
-  handleCloseText(event){
+  handleCloseText (event) {
     event.preventDefault()
-    this.setState({ openText: false})
+    this.setState({ openText: false })
   }
 
-  handleOpenText (event){
+  handleOpenText (event) {
     event.preventDefault()
-    this.setState({ openText: true})
+    this.setState({ openText: true })
   }
 
-  handleRetweet(msgId){
+  handleRetweet (msgId) {
     let alreadyRetweeted = this.state.user.retweets.filter(rt => rt === msgId)
-    if(alreadyRetweeted.length===0){
+    if (alreadyRetweeted.length === 0) {
       let messages = this.state.messages.map(msg => {
-        if(msg.id === msgId){
+        if (msg.id === msgId) {
           msg.retweets++
         }
         return msg
@@ -89,11 +93,11 @@ class Main extends Component {
     }
   }
 
-  handleFavorite(msgId){
+  handleFavorite (msgId) {
     let alreadyFavorited = this.state.user.favorites.filter(fav => fav === msgId)
-    if(alreadyFavorited.length===0){
-      let messages = this.state.messages.map(msg=>{
-        if(msg.id === msgId){
+    if (alreadyFavorited.length === 0) {
+      let messages = this.state.messages.map(msg => {
+        if (msg.id === msgId) {
           msg.favorites++
         }
         return msg
@@ -108,15 +112,15 @@ class Main extends Component {
     }
   }
 
-  handleReplyTweet(msgId, userNameToReply){
+  handleReplyTweet (msgId, userNameToReply) {
     this.setState({
       openText: true,
       userNameToReply
     })
   }
 
-  renderOpenText(){
-    if(this.state.openText){
+  renderOpenText () {
+    if (this.state.openText) {
       return (
         <InputText
           onSendText={this.handleSendText}
@@ -148,4 +152,5 @@ class Main extends Component {
   }
 }
 
+Main.propTypes = propTypes
 export default Main
