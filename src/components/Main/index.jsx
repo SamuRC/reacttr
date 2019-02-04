@@ -3,9 +3,11 @@ import uuid from 'uuid'
 import MessageList from '../MessageList'
 import InputText from '../InputText'
 import ProfileBar from '../ProfileBar'
+import firebase from 'firebase'
 
 const propTypes = {
-  user: PropTypes.object.isRequired
+  user: PropTypes.object.isRequired,
+  onLogout: PropTypes.func.isRequired
 }
 
 class Main extends Component {
@@ -16,28 +18,7 @@ class Main extends Component {
       user: Object.assign({}, this.props.user, { retweets: [] }, { favorites: [] }),
       openText: false,
       userNameToReply: '',
-      messages: [
-        {
-          id: uuid.v4(),
-          text: 'Mensaje del Tweet',
-          picture: 'https://pbs.twimg.com/profile_images/1014574035995381760/xxA7qmVp_bigger.jpg',
-          displayName: 'Samuel Cusi',
-          username: 'samurRC',
-          date: Date.now() - 180000,
-          retweets: 0,
-          favorites: 0
-        },
-        {
-          id: uuid.v4(),
-          text: 'Este es un nuevo mensaje',
-          picture: 'https://pbs.twimg.com/profile_images/1014574035995381760/xxA7qmVp_bigger.jpg',
-          displayName: 'Samuel Cusi',
-          username: 'samurRC',
-          date: Date.now() - 1800000,
-          retweets: 0,
-          favorites: 0
-        }
-      ]
+      messages: []
     }
 
     this.handleSendText = this.handleSendText.bind(this)
@@ -48,6 +29,16 @@ class Main extends Component {
     this.handleReplyTweet = this.handleReplyTweet.bind(this)
   }
 
+  componentWillMount () {
+    const messagesRef = firebase.database().ref().child('messages')
+    messagesRef.on('child_added', snapshot => {
+      this.setState({
+        messages: this.state.messages.concat(snapshot.val()),
+        openText: false
+      })
+    })
+  }
+
   handleSendText (event) {
     event.preventDefault()
     let newMessage = {
@@ -56,13 +47,14 @@ class Main extends Component {
       displayName: this.props.user.displayName,
       picture: this.props.user.photoURL,
       date: Date.now(),
-      text: event.target.text.value
+      text: event.target.text.value,
+      favorites: 0,
+      retweets: 0
     }
-    this.setState({
-      messages: this.state.messages.concat([newMessage]),
-      openText: false
-    })
-    console.log(newMessage)
+
+    const messageRef = firebase.database().ref().child('messages')
+    const messageID = messageRef.push()
+    messageID.set(newMessage)
   }
 
   handleCloseText (event) {
@@ -138,6 +130,7 @@ class Main extends Component {
           picture={this.props.user.photoURL}
           username={this.props.user.email.split('@')[0]}
           onOpenText={this.handleOpenText}
+          onLogout={this.props.onLogout}
         />
         { this.renderOpenText()}
 

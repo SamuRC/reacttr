@@ -9,12 +9,12 @@ const propTypes = {
 
 function InputText ({ onSendText, userNameToReply, onCloseText }) {
   return (
-    <form className={styles.form} onSubmit={this.props.onSendText}>
+    <form className={styles.form} onSubmit={onSendText}>
       <textarea className={styles.text} name='text'>
-        { (this.props.userNameToReply) ? `@${this.props.userNameToReply} ` : '' }
+        { (userNameToReply) ? `@${userNameToReply} ` : '' }
       </textarea>
       <div className={styles.buttons}>
-        <button className={styles.close} onClick={this.props.onCloseText}>
+        <button className={styles.close} onClick={onCloseText}>
           Cerrar
         </button>
         <button className={styles.send} type='submit'>

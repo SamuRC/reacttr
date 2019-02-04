@@ -13,7 +13,7 @@ function Login ({ onAuth }) {
         para que puedas leer y escribir mensajes
       </p>
       <button
-        onClick={this.props.onAuth}
+        onClick={onAuth}
         className={styles.button}>
         <span className='fa fa-github' /> Login con Github
       </button>
